@@ -1,4 +1,4 @@
-# TITLE
+# AI PROMPTS
 
 
 ## Install
@@ -10,11 +10,6 @@
 ## Run
 
 - To execute the service run `node index.js`
-
-
-## Test
-
-- To test this you can use [postman](https://www.postman.com/) or a simple curl request: `curl http://localhost:3001/hello`
 
 
 ## Configure environment
