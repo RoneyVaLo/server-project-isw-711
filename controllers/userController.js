@@ -19,13 +19,23 @@ const userGet = (req, res) => {
         //* Get a user by Username and Password
 
         const { user_name, password } = req.body;
-        User.findOne({ user_name, password }).then((user) => {
-            res.json(user);
-        }).catch(err => {
-            res.status(404);
-            console.log('error while queryting the user', err)
-            res.json({ error: "User doesnt exist" })
-        });
+
+        User.findOne({ user_name, password })
+            .then((user) => {
+                if (user) {
+                    res.json(user);
+                } else {
+                    res.status(404);
+                    console.log('Error while querying the user');
+                    res.json({ error: "User doesn't exist" });
+                }
+            }).catch(err => {
+                res.status(404);
+                console.log('error while queryting the user', err)
+                res.json({ error: "User doesnt exist" })
+            });
+
+        return User.findOne({ user_name, password });
     } else {
 
         //* Get all existing users in the database
