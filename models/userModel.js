@@ -8,7 +8,8 @@ const user = new Schema({
     role: { type: String },
     user_name: { type: String },
     password: { type: String },
-    profile_image: { type: String }
+    profile_image: { type: String },
+    verified: { type: Boolean }
 });
 
 module.exports = mongoose.model('Users', user);
