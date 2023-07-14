@@ -14,13 +14,13 @@ const userGet = (req, res) => {
                 console.log('error while queryting the user', err)
                 res.json({ error: "User doesnt exist" })
             });
-    } else if (req.body.user_name && req.body.password) {
+    } else if (req.body.email && req.body.password) {
 
-        //* Get a user by Username and Password
+        //* Get a user by Email and Password
 
-        const { user_name, password } = req.body;
+        const { email, password } = req.body;
 
-        return User.findOne({ user_name, password });
+        return User.findOne({ email, password });
     } else {
 
         //* Get all existing users in the database
@@ -39,6 +39,7 @@ const userGet = (req, res) => {
 const userPost = async (req, res) => {
     let user = new User();
 
+    // TODO: Consultar si el email existe, y si no existe que permita crear el usuario
     try {
         user.first_name = req.body.first_name;
         user.last_name = req.body.last_name;
