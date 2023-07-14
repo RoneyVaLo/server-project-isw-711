@@ -24,7 +24,7 @@ app.use(cors({
     domains: '*',
     methods: "*"
 }));
-//!----------------------------------------------------------------------------
+
 
 // login token based
 app.post("/api/login", async (req, res, next) => {
@@ -32,19 +32,27 @@ app.post("/api/login", async (req, res, next) => {
 
     users.then((user) => {
         if (user) {
-            const session = saveSession(user);
-            /* session.then((session) => {
-                if (!session) {
+            if (user.verified) {
+                const session = saveSession(user);
+
+                session.then((session) => {
+                    res.status(201).json({
+                        session
+                    });
+                }).catch(err => {
                     res.status(422);
                     res.json({
                         error: 'There was an error saving the session'
                     });
-                }
-                res.status(201).json({
-                    session
+                })
+                    ;
+                return;
+            } else {
+                res.status(422);
+                res.json({
+                    error: 'User not verified'
                 });
-            }); */
-            return;
+            };
         } else {
             res.status(422);
             res.json({
@@ -54,7 +62,11 @@ app.post("/api/login", async (req, res, next) => {
     });
 });
 
+app.post("/api/users", userPost);
+
+
 app.use(async (req, res, next) => {
+
     if (req.headers["authorization"]) {
         const token = req.headers['authorization'].split(' ')[1];
         try {
@@ -88,11 +100,8 @@ app.use(async (req, res, next) => {
 });
 
 
-
-//!----------------------------------------------------------------------------
 // Management for users
 app.get("/api/users", userGet);
-app.post("/api/users", userPost);
 app.patch("/api/users", userPatch);
 app.put("/api/users", userPatch);
 app.delete("/api/users", userDelete);
