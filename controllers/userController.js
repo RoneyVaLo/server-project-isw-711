@@ -20,21 +20,6 @@ const userGet = (req, res) => {
 
         const { user_name, password } = req.body;
 
-        User.findOne({ user_name, password })
-            .then((user) => {
-                if (user) {
-                    res.json(user);
-                } else {
-                    res.status(404);
-                    console.log('Error while querying the user');
-                    res.json({ error: "User doesn't exist" });
-                }
-            }).catch(err => {
-                res.status(404);
-                console.log('error while queryting the user', err)
-                res.json({ error: "User doesnt exist" })
-            });
-
         return User.findOne({ user_name, password });
     } else {
 
@@ -58,12 +43,12 @@ const userPost = async (req, res) => {
         user.first_name = req.body.first_name;
         user.last_name = req.body.last_name;
         user.age = req.body.age;
-        user.role = req.body.role;
-        user.user_name = req.body.user_name;
+        user.role = "user";
+        user.email = req.body.email;
         user.password = req.body.password;
-        user.profile_image = req.body.profile_image;
+        user.profile_image = req.body.profile_image ? req.body.profile_image : "";
+        user.verified = req.body.verified ? req.body.verified : false;
 
-        // TODO: COMPROBAR SI ES NECESARIO USAR EL "await" O SE PUEDE ELIMINAR
         await user.save()
             .then(data => {
                 res.status(201); // CREATED
@@ -97,9 +82,10 @@ const userPatch = (req, res) => {
             user.last_name = req.body.last_name ? req.body.last_name : user.last_name;
             user.age = req.body.age ? req.body.age : user.age;
             user.role = req.body.role ? req.body.role : user.role;
-            user.user_name = req.body.user_name ? req.body.user_name : user.user_name;
+            user.email = req.body.email ? req.body.email : user.email;
             user.password = req.body.password ? req.body.password : user.password;
             user.profile_image = req.body.profile_image ? req.body.profile_image : user.profile_image;
+            user.verified = req.body.verified ? req.body.verified : user.verified;
 
             user.save().then(() => {
                 res.status(200);
@@ -148,7 +134,7 @@ const userDelete = (req, res) => {
             });
     } else {
         res.status(404);
-        res.json({ error: "Teacher doesnt exist" })
+        res.json({ error: "User doesnt exist" })
     };
 };
 
