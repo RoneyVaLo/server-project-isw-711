@@ -6,7 +6,7 @@ const user = new Schema({
     last_name: { type: String },
     age: { type: Number },
     role: { type: String },
-    user_name: { type: String },
+    email: { type: String },
     password: { type: String },
     profile_image: { type: String },
     verified: { type: Boolean }
