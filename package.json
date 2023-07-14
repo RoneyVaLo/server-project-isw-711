@@ -4,7 +4,7 @@
   "description": "This is the server for the project of the course ISW-711",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon index.js"
   },
   "author": "Roney Valdelomar",
   "license": "ISC",
@@ -14,5 +14,8 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "mongoose": "^7.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
