@@ -99,6 +99,19 @@ app.use(async (req, res, next) => {
     }
 });
 
+app.get("/api/session", async (req, res) => {
+    const token = req.headers['authorization'].split(' ')[1];
+    try {
+        const sessions = await getSession(token);
+        res.status(200);
+        res.send(sessions[0]);
+    } catch (err) {
+        res.status(404);
+        console.log('error while queryting the session', err);
+        res.json({ error: "Session doesnt exist" });
+    }
+});
+
 
 // Management for users
 app.get("/api/users", userGet);
