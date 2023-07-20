@@ -101,8 +101,37 @@ const promptPatch = (req, res) => {
     };
 };
 
+const promptDelete = (req, res) => {
+    if (req.query && req.query.id) {
+        Prompt.findById(req.query.id)
+            .then(prompt => {
+                prompt.deleteOne()
+                    .then(() => {
+                        res.status(204);
+                        res.json({});
+                    })
+                    .catch(err => {
+                        res.status(422);
+                        console.log('error while deleting the prompt', err);
+                        res.json({
+                            error: 'There was an error deleting the prompt'
+                        });
+                    });
+            })
+            .catch(err => {
+                res.status(404);
+                console.log('error while queryting the prompt', err);
+                res.json({ error: "Prompt doesnt exist" });
+            });
+    } else {
+        res.status(404);
+        res.json({ error: "Prompt doesnt exist" })
+    };
+};
+
 module.exports = {
     promptPost,
     promptGet,
-    promptPatch
+    promptPatch,
+    promptDelete
 }
