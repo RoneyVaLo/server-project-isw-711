@@ -36,8 +36,36 @@ const promptPost = async (req, res) => {
 };
 
 
+const promptGet = (req, res) => {
+    if (req.query && req.query.id) {
 
+        //* Get a prompt by id
+
+        Prompt.findById(req.query.id)
+            .then((prompt) => {
+                res.json(prompt);
+            })
+            .catch(err => {
+                res.status(404);
+                console.log('error while queryting the prompt', err)
+                res.json({ error: "Prompt doesnt exist" })
+            });
+    } else {
+
+        //* Get all existing users in the database
+
+        Prompt.find()
+            .then(prompts => {
+                res.json(prompts);
+            })
+            .catch(err => {
+                res.status(422);
+                res.json({ "error": err });
+            });
+    }
+};
 
 module.exports = {
     promptPost,
+    promptGet
 }
