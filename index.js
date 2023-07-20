@@ -12,6 +12,7 @@ const db = mongoose.connect(process.env.DB_CONNECTION_STRING, {
 
 const { userGet, userPost, userPatch, userDelete } = require("./controllers/userController.js");
 const { saveSession, getSession } = require("./controllers/sessionController.js");
+const { promptPost, promptGet, promptPatch, promptDelete } = require('./controllers/promptController.js');
 
 
 // Parser for the request body
@@ -118,5 +119,14 @@ app.get("/api/users", userGet);
 app.patch("/api/users", userPatch);
 app.put("/api/users", userPatch);
 app.delete("/api/users", userDelete);
+
+// Management for prompts
+app.post("/api/prompts", promptPost);
+app.get("/api/prompts", promptGet);
+app.patch("/api/prompts", promptPatch);
+app.put("/api/prompts", promptPatch);
+app.delete("/api/prompts", promptDelete);
+
+
 
 app.listen(3001, () => console.log(`Server listening on port 3001!`));
