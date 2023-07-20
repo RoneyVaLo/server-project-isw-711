@@ -65,7 +65,44 @@ const promptGet = (req, res) => {
     }
 };
 
+const promptPatch = (req, res) => {
+    if (req.query && req.query.id) {
+        Prompt.findById(req.query.id).then(prompt => {
+
+            prompt.user = req.body.user ? req.body.user : prompt.user;
+            prompt.name = req.body.name ? req.body.name : prompt.name;
+            prompt.type = req.body.type ? req.body.type : prompt.type;
+            prompt.data = req.body.data ? req.body.data : prompt.data;
+            prompt.tags = req.body.tags ? req.body.tags : prompt.tags;
+            prompt.results = req.body.results ? req.body.results : prompt.results;
+
+            prompt.save()
+                .then(() => {
+                    res.status(200);
+                    res.json(prompt);
+                })
+                .catch(err => {
+                    res.status(422);
+                    console.log('error while saving the prompt', err)
+                    res.json({
+                        error: 'There was an error saving the prompt'
+                    });
+                });
+
+        })
+            .catch(err => {
+                res.status(404);
+                console.log('error while queryting the prompt', err)
+                res.json({ error: "Prompt doesnt exist" })
+            });
+    } else {
+        res.status(404);
+        res.json({ error: "Prompt doesn't exist" });
+    };
+};
+
 module.exports = {
     promptPost,
-    promptGet
+    promptGet,
+    promptPatch
 }
