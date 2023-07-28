@@ -13,6 +13,7 @@ const db = mongoose.connect(process.env.DB_CONNECTION_STRING, {
 const { userGet, userPost, userPatch, userDelete } = require("./controllers/userController.js");
 const { saveSession, getSession } = require("./controllers/sessionController.js");
 const { promptPost, promptGet, promptPatch, promptDelete } = require('./controllers/promptController.js');
+const { createEdit, createImage, createCompletion } = require('./controllers/openAiController.js');
 
 
 // Parser for the request body
@@ -126,6 +127,10 @@ app.get("/api/prompts", promptGet);
 app.patch("/api/prompts", promptPatch);
 app.put("/api/prompts", promptPatch);
 app.delete("/api/prompts", promptDelete);
+
+app.post("/api/image", createImage);
+app.post("/api/edit", createEdit);
+app.post("/api/completion", createCompletion);
 
 
 
