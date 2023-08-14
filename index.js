@@ -1,4 +1,7 @@
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
 const express = require('express');
 const app = express();
 
@@ -7,8 +10,9 @@ const mongoose = require("mongoose");
 const db = mongoose.connect(process.env.DB_CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    //useFindAndModify: false,
 });
+
+const theSecretKey = process.env.JWT_SECRET;
 
 const { userGet, userPost, userPatch, userDelete } = require("./controllers/userController.js");
 const { saveSession, getSession } = require("./controllers/sessionController.js");
@@ -29,25 +33,65 @@ app.use(cors({
 
 
 // login token based
-app.post("/api/login", async (req, res, next) => {
-    const users = userGet(req, res);
+app.post("/api/login", async (req, res) => {
+    const user = await userGet(req, res);
+    if (user) {
+        const { password } = req.body;
 
-    users.then((user) => {
-        if (user) {
-            if (user.verified) {
-                const session = saveSession(user);
+        if (password) {
+            const passwordMatch = await bcrypt.compare(password, user.password);
 
-                session.then((session) => {
+            if (passwordMatch) {
+                if (user.verified) {
+
+                    const token = jwt.sign({
+                        userId: user._id,
+                        email: user.email,
+                        role: user.role,
+                        verified: user.verified
+                    }, theSecretKey, { expiresIn: "1d" });
+
                     res.status(201).json({
-                        session
+                        token
                     });
-                }).catch(err => {
+
+                    return;
+                } else {
                     res.status(422);
                     res.json({
-                        error: 'There was an error saving the session'
+                        error: 'User not verified'
                     });
-                })
-                    ;
+                };
+            };
+        } else {
+            res.status(422);
+            res.json({
+                error: 'Invalid username or password'
+            });
+        };
+    } else {
+        res.status(422);
+        res.json({
+            error: 'Invalid username or password'
+        });
+    };
+
+    /* users.then((user) => {
+        if (user) {
+            if (user.verified) {
+
+                const token = jwt.sign({
+                    userId: user._id,
+                    email: user.email,
+                    role: user.role,
+                    verified: user.verified
+                }, theSecretKey, { expiresIn: "1d" });
+
+                // console.log(token)
+                res.status(201).json({
+                    token
+                });
+
                 return;
             } else {
                 res.status(422);
@@ -61,10 +105,10 @@ app.post("/api/login", async (req, res, next) => {
                 error: 'Invalid username or password'
             });
         };
-    });
+    }); */
 });
 
-app.post("/api/users", userPost);
+app.post("/api/user/register", userPost);
 
 
 app.use(async (req, res, next) => {
@@ -72,21 +116,15 @@ app.use(async (req, res, next) => {
     if (req.headers["authorization"]) {
         const token = req.headers['authorization'].split(' ')[1];
         try {
-            // Validate if token exists in the database
-            const sessions = await getSession(token);
-
-            // Validate that the sessions are not expired
-            const sessionsNotExpired = sessions.filter(session => session.expire > (new Date().getDate()));
-
-            if (sessionsNotExpired.length > 0) {
+            jwt.verify(token, theSecretKey, (err, decodedToken) => {
+                if (err || !decodedToken) {
+                    res.status(401);
+                    res.json({
+                        error: "Unauthorized"
+                    });
+                };
                 next();
-                return;
-            } else {
-                res.status(401);
-                res.send({
-                    error: "Unauthorized "
-                });
-            }
+            });
         } catch (e) {
             res.status(422);
             res.send({
@@ -116,6 +154,12 @@ app.get("/api/session", async (req, res) => {
 
 
 // Management for users
+
+//? This is to get an user by email
+app.post("/api/users", async (req, res) => {
+    let user = await userGet(req, res);
+    res.json(user);
+});
 app.get("/api/users", userGet);
 app.patch("/api/users", userPatch);
 app.put("/api/users", userPatch);

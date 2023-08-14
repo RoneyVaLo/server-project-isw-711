@@ -15,19 +15,13 @@ const userGet = async (req, res) => {
                 console.log('error while queryting the user', err)
                 res.json({ error: "User doesnt exist" })
             });
-    } else if (req.body.email && req.body.password) {
+    } else if (req.body.email) {
 
-        //* Get a user by Email and Password
-
-        const { email, password } = req.body;
-
-
-        const user = await User.findOne({ email });
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        //* Get a user by Email
         
-        if (passwordMatch) {
-            return User.findOne({ email });
-        }
+        const { email } = req.body;
+        return User.findOne({ email });
+
     } else {
 
         //* Get all existing users in the database
@@ -86,7 +80,7 @@ const userPost = async (req, res) => {
 
 const userPatch = (req, res) => {
     if (req.query && req.query.id) {
-        User.findById(req.query.id).then( async (user) => {
+        User.findById(req.query.id).then(async (user) => {
 
             let hashedPassword = "";
             if ((req.body.password) && (req.body.password !== "")) {
