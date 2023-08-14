@@ -50,11 +50,11 @@ const promptGet = (req, res) => {
                 console.log('error while queryting the prompt', err)
                 res.json({ error: "Prompt doesnt exist" })
             });
-    } else {
+    } else if (req.query.user) {
 
         //* Get all existing users in the database
 
-        Prompt.find()
+        Prompt.find({ user: req.query.user })
             .then(prompts => {
                 res.json(prompts);
             })
@@ -62,6 +62,10 @@ const promptGet = (req, res) => {
                 res.status(422);
                 res.json({ "error": err });
             });
+    } else {
+        res.status(404);
+        console.log('error while queryting the prompt')
+        res.json({ error: 'error while queryting the prompt' })
     }
 };
 

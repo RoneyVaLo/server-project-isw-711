@@ -1,6 +1,7 @@
+const bcrypt = require('bcryptjs');
 const User = require("../models/userModel");
 
-const userGet = (req, res) => {
+const userGet = async (req, res) => {
     if (req.query && req.query.id) {
 
         //* Get a user by id
@@ -20,7 +21,13 @@ const userGet = (req, res) => {
 
         const { email, password } = req.body;
 
-        return User.findOne({ email, password });
+
+        const user = await User.findOne({ email });
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        
+        if (passwordMatch) {
+            return User.findOne({ email });
+        }
     } else {
 
         //* Get all existing users in the database
@@ -39,14 +46,16 @@ const userGet = (req, res) => {
 const userPost = async (req, res) => {
     let user = new User();
 
-    // TODO: Consultar si el email existe, y si no existe que permita crear el usuario
     try {
+
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
         user.first_name = req.body.first_name;
         user.last_name = req.body.last_name;
         user.age = req.body.age;
-        user.role = "user";
+        user.role = req.body.role;
         user.email = req.body.email;
-        user.password = req.body.password;
+        user.password = hashedPassword; //! req.body.password;
         user.profile_image = req.body.profile_image ? req.body.profile_image : "";
         user.verified = req.body.verified ? req.body.verified : false;
 
@@ -77,16 +86,23 @@ const userPost = async (req, res) => {
 
 const userPatch = (req, res) => {
     if (req.query && req.query.id) {
-        User.findById(req.query.id).then(user => {
+        User.findById(req.query.id).then( async (user) => {
+
+            let hashedPassword = "";
+            if ((req.body.password) && (req.body.password !== "")) {
+                hashedPassword = await bcrypt.hash(req.body.password, 10);
+            } else {
+                hashedPassword = user.password;
+            }
 
             user.first_name = req.body.first_name ? req.body.first_name : user.first_name;
             user.last_name = req.body.last_name ? req.body.last_name : user.last_name;
             user.age = req.body.age ? req.body.age : user.age;
             user.role = req.body.role ? req.body.role : user.role;
             user.email = req.body.email ? req.body.email : user.email;
-            user.password = req.body.password ? req.body.password : user.password;
+            user.password = hashedPassword;
             user.profile_image = req.body.profile_image ? req.body.profile_image : user.profile_image;
-            user.verified = req.body.verified ? req.body.verified : user.verified;
+            user.verified = (typeof (req.body.verified) === "boolean") ? req.body.verified : user.verified;
 
             user.save().then(() => {
                 res.status(200);
