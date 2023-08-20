@@ -18,6 +18,7 @@ const { userGet, userPost, userPatch, userDelete } = require("./controllers/user
 const { saveSession, getSession } = require("./controllers/sessionController.js");
 const { promptPost, promptGet, promptPatch, promptDelete } = require('./controllers/promptController.js');
 const { createEdit, createImage, createCompletion } = require('./controllers/openAiController.js');
+const { sendEmail } = require('./controllers/sendEmailController.js');
 
 
 // Parser for the request body
@@ -75,40 +76,10 @@ app.post("/api/login", async (req, res) => {
             error: 'Invalid username or password'
         });
     };
-
-    /* users.then((user) => {
-        if (user) {
-            if (user.verified) {
-
-                const token = jwt.sign({
-                    userId: user._id,
-                    email: user.email,
-                    role: user.role,
-                    verified: user.verified
-                }, theSecretKey, { expiresIn: "1d" });
-
-                // console.log(token)
-                res.status(201).json({
-                    token
-                });
-
-                return;
-            } else {
-                res.status(422);
-                res.json({
-                    error: 'User not verified'
-                });
-            };
-        } else {
-            res.status(422);
-            res.json({
-                error: 'Invalid username or password'
-            });
-        };
-    }); */
 });
 
 app.post("/api/user/register", userPost);
+app.post("/api/users/verification-email", sendEmail);
 
 
 app.use(async (req, res, next) => {
