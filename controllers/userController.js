@@ -1,6 +1,11 @@
 const bcrypt = require('bcryptjs');
 const User = require("../models/userModel");
 
+
+const getUserByEmail = (email) => {
+    return User.findOne({email});
+};
+
 const userGet = async (req, res) => {
     if (req.query && req.query.id) {
 
@@ -18,7 +23,7 @@ const userGet = async (req, res) => {
     } else if (req.body.email) {
 
         //* Get a user by Email
-        
+
         const { email } = req.body;
         return User.findOne({ email });
 
@@ -42,16 +47,19 @@ const userPost = async (req, res) => {
 
     try {
 
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const { first_name, last_name, age, role, email, password, profile_image, verified, phone } = req.body;
 
-        user.first_name = req.body.first_name;
-        user.last_name = req.body.last_name;
-        user.age = req.body.age;
-        user.role = req.body.role;
-        user.email = req.body.email;
-        user.password = hashedPassword; //! req.body.password;
-        user.profile_image = req.body.profile_image ? req.body.profile_image : "";
-        user.verified = req.body.verified ? req.body.verified : false;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        user.first_name = first_name;
+        user.last_name = last_name;
+        user.age = age;
+        user.role = role ? role : "user";
+        user.email = email;
+        user.password = hashedPassword;
+        user.profile_image = profile_image ? profile_image : "";
+        user.verified = verified ? verified : false;
+        user.phone = phone;
 
         await user.save()
             .then(data => {
@@ -97,6 +105,7 @@ const userPatch = (req, res) => {
             user.password = hashedPassword;
             user.profile_image = req.body.profile_image ? req.body.profile_image : user.profile_image;
             user.verified = (typeof (req.body.verified) === "boolean") ? req.body.verified : user.verified;
+            user.phone = req.body.phone ? req.body.phone : user.phone;
 
             user.save().then(() => {
                 res.status(200);
@@ -150,9 +159,49 @@ const userDelete = (req, res) => {
 };
 
 
+const userVerification = (req, res) => {
+    if (req.query && req.query.id) {
+        User.findById(req.query.id).then(async (user) => {
+
+            if (!user.verified) {
+                user.verified = true;
+
+                user.save()
+                    .then(() => {
+                        res.status(200);
+                        res.json({ message: "Verification successfully" });
+                    })
+                    .catch(err => {
+                        res.status(422);
+                        console.log('error while verifying the user', err)
+                        res.json({
+                            error: 'There was an error verifying the user'
+                        });
+                    });
+            } else {
+                res.status(200);
+                res.json({ message: "Verification successfully" });
+            }
+
+
+        })
+            .catch(err => {
+                res.status(404);
+                console.log('error while queryting the user', err)
+                res.json({ error: "User doesnt exist" })
+            });
+    } else {
+        res.status(404);
+        res.json({ error: "User doesn't exist" });
+    };
+};
+
+
 module.exports = {
+    getUserByEmail,
     userGet,
     userPost,
     userPatch,
-    userDelete
+    userDelete,
+    userVerification
 };
