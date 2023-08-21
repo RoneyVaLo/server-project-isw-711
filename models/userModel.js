@@ -6,11 +6,12 @@ const user = new Schema(
         first_name: { type: String },
         last_name: { type: String },
         age: { type: Number },
-        role: { type: String },
+        role: { type: String, default: "user" },
         email: { type: String, unique: true },
         password: { type: String },
-        profile_image: { type: String },
-        verified: { type: Boolean, default: false }
+        profile_image: { type: String, default: "" },
+        verified: { type: Boolean, default: false },
+        phone: { type: Object },
     },
     {
         timestamps: true
