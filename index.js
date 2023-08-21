@@ -14,7 +14,7 @@ const db = mongoose.connect(process.env.DB_CONNECTION_STRING, {
 
 const theSecretKey = process.env.JWT_SECRET;
 
-const { userGet, userPost, userPatch, userDelete } = require("./controllers/userController.js");
+const { getUserByEmail, userGet, userPost, userPatch, userDelete, userVerification } = require("./controllers/userController.js");
 const { saveSession, getSession } = require("./controllers/sessionController.js");
 const { promptPost, promptGet, promptPatch, promptDelete } = require('./controllers/promptController.js');
 const { createEdit, createImage, createCompletion } = require('./controllers/openAiController.js');
@@ -80,6 +80,8 @@ app.post("/api/login", async (req, res) => {
 
 app.post("/api/user/register", userPost);
 app.post("/api/users/verification-email", sendEmail);
+app.patch("/api/users/verification-email", userVerification);
+app.put("/api/users/verification-email", userVerification);
 
 
 app.use(async (req, res, next) => {
@@ -93,8 +95,9 @@ app.use(async (req, res, next) => {
                     res.json({
                         error: "Unauthorized"
                     });
+                } else {
+                    next();
                 };
-                next();
             });
         } catch (e) {
             res.status(422);
@@ -110,33 +113,40 @@ app.use(async (req, res, next) => {
     }
 });
 
-app.get("/api/session", async (req, res) => {
-    const token = req.headers['authorization'].split(' ')[1];
+//* Routes for user's management
+
+//? Get only one user using the data in the token
+app.get("/api/user", async (req, res) => {
     try {
-        const sessions = await getSession(token);
-        res.status(200);
-        res.send(sessions[0]);
-    } catch (err) {
-        res.status(404);
-        console.log('error while queryting the session', err);
-        res.json({ error: "Session doesnt exist" });
+        const token = req.headers['authorization'].split(' ')[1];
+        const decodedToken = jwt.verify(token, theSecretKey);
+
+        const user = await getUserByEmail(decodedToken.email);
+        if (user) {
+            res.status(200);
+            res.json(user);
+        } else {
+            res.status(404);
+            console.log('Error while queryting the user')
+            res.json({ error: "User doesnt exist" })
+        }
+    } catch (error) {
+        console.error('Error al decodificar el token:', error.message);
     }
 });
-
-
-// Management for users
 
 //? This is to get an user by email
 app.post("/api/users", async (req, res) => {
     let user = await userGet(req, res);
     res.json(user);
 });
+
 app.get("/api/users", userGet);
 app.patch("/api/users", userPatch);
 app.put("/api/users", userPatch);
 app.delete("/api/users", userDelete);
 
-// Management for prompts
+//* Routes for prompts's management
 app.post("/api/prompts", promptPost);
 app.get("/api/prompts", promptGet);
 app.patch("/api/prompts", promptPatch);
