@@ -15,7 +15,6 @@ const db = mongoose.connect(process.env.DB_CONNECTION_STRING, {
 const theSecretKey = process.env.JWT_SECRET;
 
 const { getUserByEmail, userGet, userPost, userPatch, userDelete, userVerification } = require("./controllers/userController.js");
-const { saveSession, getSession } = require("./controllers/sessionController.js");
 const { promptPost, promptGet, promptPatch, promptDelete } = require('./controllers/promptController.js');
 const { createEdit, createImage, createCompletion } = require('./controllers/openAiController.js');
 const { sendEmail } = require('./controllers/sendEmailController.js');
