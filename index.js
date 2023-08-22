@@ -18,6 +18,7 @@ const { getUserByEmail, userGet, userPost, userPatch, userDelete, userVerificati
 const { promptPost, promptGet, promptPatch, promptDelete } = require('./controllers/promptController.js');
 const { createEdit, createImage, createCompletion } = require('./controllers/openAiController.js');
 const { sendEmail } = require('./controllers/sendEmailController.js');
+const { sendMessage } = require('./controllers/sendMessageController.js');
 
 
 // Parser for the request body
@@ -81,6 +82,7 @@ app.post("/api/user/register", userPost);
 app.post("/api/users/verification-email", sendEmail);
 app.patch("/api/users/verification-email", userVerification);
 app.put("/api/users/verification-email", userVerification);
+app.post("/api/users/send-code2FA", sendMessage);
 
 
 app.use(async (req, res, next) => {

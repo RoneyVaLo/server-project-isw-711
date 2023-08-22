@@ -11,7 +11,8 @@ const user = new Schema(
         password: { type: String },
         profile_image: { type: String, default: "" },
         verified: { type: Boolean, default: false },
-        phone: { type: Object },
+        phone: { type: String },
+        has2FA: { type: Boolean, default: true }
     },
     {
         timestamps: true
